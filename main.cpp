@@ -10,24 +10,6 @@ enum dir{UP,RIGHT,DOWN,LEFT};
 
 
 ////////////////////////////////////////////////////
-class CWindow{
-    public:
-uint rozmiar;
-uint wynik;
-uint life;
-uint hit_box;
-uint margines;
-
-
-    CWindow(uint,uint,uint,uint);
-    ~CWindow();
-    bool refresh();
-    bool control();
-    //bool collision();
-
-
-};
-////////////////////////////////////////////////////
 class CObject{
 public:
 
@@ -42,6 +24,26 @@ public:
     std::cout << "X: " <<this->x << "Y: " << this->y << std::endl;
     }
 };
+
+class CWindow{
+    public:
+uint rozmiar;
+uint wynik;
+uint life;
+uint hit_box;
+uint margines;
+
+
+    CWindow(uint,uint,uint,uint);
+    ~CWindow();
+    bool refresh(CObject*, CObject*, CObject*);
+    bool control();
+    //bool collision();
+
+
+};
+////////////////////////////////////////////////////
+
 
 class CPlayer :public CObject{
 public:
@@ -133,6 +135,8 @@ bool CPlayer::colision(CWindow* W){
             W->life--;
             if(W->life == 0){
                 outtextxy(this->x, this->y, "KONIEC GRY!!!");
+                W->life = 3;
+                W->wynik = 0;
                 getch();
                 return 0;
             }
@@ -173,6 +177,8 @@ if((Px>= e-hit_box && Px<= e+hit_box)&&(Py>= r-hit_box && Py<= r+hit_box)){
             Sleep(100);
             if(W->life == 0){
                 outtextxy(Px, Py, "KONIEC GRY!!!");
+                W->life = 3;
+                W->wynik = 0;
                 getch();
                 return 0;
             }
@@ -212,6 +218,8 @@ this->life = _life+1;
 this->hit_box = _hit;
 this->margines = _marg;
 initwindow(this->rozmiar, this->rozmiar);
+outtextxy(getmaxx()/2 -100, getmaxy()/2, "Streowanie strzalkami");
+outtextxy(getmaxx()/2 - 150, getmaxy()/2 - 20, "Nacisnij dowolny klawisz aby kontynuowac");
 getch();
 }
 
@@ -219,10 +227,21 @@ CWindow::~CWindow(){
 closegraph();
 }
 
-bool CWindow::refresh(){
+bool CWindow::refresh(CObject* P, CObject* F, CObject* X){
+    char arr[50];
+
     cleardevice();
     rectangle(50,450,450,50);
+    ////
+    outtextxy(P->x, P->y, "O");
+    outtextxy(F->x, F->y, "F");
+    outtextxy(X->x, X->y, "X");
 
+        sprintf(arr, "Wynik: %d", this->wynik);
+        outtextxy(10, 10, arr);
+        sprintf(arr, "Lifes: %d", this->life);
+        outtextxy(10, 30, arr);
+    ////
 }
 
 ////////////////////////////////////////////////////
@@ -232,7 +251,7 @@ bool CWindow::refresh(){
 
 int main(){
 srand (time(NULL));
-char arr[50];
+
 CWindow W1(500, 3, 10, 75);
 CPlayer P1(0,0);
 CFood F1(100,100);
@@ -240,19 +259,14 @@ CEnemy X1(200,100,4);
 
 do{
     P1.get_direction();
-    W1.refresh();
+
     P1.colision(&W1);
     F1.colision(&P1, &W1);
     X1.colision(&P1, &W1);
     X1.obj_move(&P1);
-    outtextxy(P1.x, P1.y, "O");
-    outtextxy(F1.x, F1.y, "F");
-    outtextxy(X1.x, X1.y, "X");
+    W1.refresh(&P1, &F1, &X1);
 
-        sprintf(arr, "Wynik: %d", W1.wynik);
-        outtextxy(10, 10, arr);
-        sprintf(arr, "Lifes: %d", W1.life);
-        outtextxy(10, 30, arr);
+
 
     Sleep(100);
 }while(1);
